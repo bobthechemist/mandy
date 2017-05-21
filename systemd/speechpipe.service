@@ -1,0 +1,12 @@
+[Unit]
+Description=Mandy's speech pipe
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/home/pi/mandy/assets/startspeechpipe.sh
+ExecStop=killall pocketsphinx_continuous
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,12 @@
+# language models should not be retained
+*.dic
+*.lm
+*.tgz
+ftee
+
+# Compiled python
+*.pyc
+
+# Wolfram notebooks (store as wl files)
+*.nb
+

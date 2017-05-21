@@ -1,0 +1,14 @@
+[Unit]
+Description=Mandy
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/home/pi/mandy/mandy.sh
+ExecStop=kill $(ps ax | grep "[p]ython mandyloop.py" | awk '{print $1}')
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
+

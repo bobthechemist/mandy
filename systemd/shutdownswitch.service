@@ -1,0 +1,11 @@
+[Unit]
+Description=Safe shutdown switch service
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/home/pi/ptable/shutdownswitch.py
+
+[Install]
+WantedBy=multi-user.target
+
