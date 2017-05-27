@@ -17,6 +17,22 @@ static int zpmap[] = {-1, 77, 0, 78, 89, 1, 2, 3, 4, 5, 6, 79, 88, 7, 8, 9, 10, 
 28, 29, 30, 83, 84, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, \
 102, 103, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 31, 32, 33, 34, 35, \
 36};
+
+static int pgtoz[10][18]={
+  {1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2}, {3, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5, 6, 7, 8, 9, 
+  10}, {11, 12, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 13, 14, 15, 
+  16, 17, 18}, {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 
+  32, 33, 34, 35, 36}, {37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 
+  48, 49, 50, 51, 52, 53, 54}, {55, 56, 71, 72, 73, 74, 75, 76, 77, 
+  78, 79, 80, 81, 82, 83, 84, 85, 86}, {87, 88, 103, 104, 105, 106, 
+  107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 
+  118}, {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, \
+-1, -1, -1}, {-1, -1, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 
+  69, 70, -1, -1}, {-1, -1, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 
+  99, 100, 101, 102, -1, -1}};
+
+
+  
   
 Adafruit_NeoPixel table = Adafruit_NeoPixel(ELEMENTS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -28,11 +44,13 @@ boolean stringComplete = false;
 int inputPos = 0;
 boolean inputError = false; // Not used presently
 
-// Definitions
-void quickColor(uint32_t);
-void rainbowCycle(uint8_t); 
+// function declarations
 void colorWipe(uint32_t, uint8_t);
-uint32_t Wheel(byte); 
+void quickColor(uint32_t);
+void rainbowCycle(uint8_t);
+void highlight(uint8_t);
+uint32_t Wheel(byte);
+
 
 void setup() {
   // Initialize serial
@@ -40,6 +58,8 @@ void setup() {
   // Initialize table
   table.begin();
   table.show(); // Initialize all pixels to 'off'
+
+  Serial.println(pgtoz[4][1]);
 }
 
 void loop() {
@@ -72,6 +92,11 @@ void loop() {
     // Color wipe in atomic number order
     else if (colors[0]==253) {
       colorWipe(table.Color(colors[1],colors[2],colors[3]),20);
+    }
+    // Testing pgtoz
+    else if (colors[0]==252) {
+      Serial.println(pgtoz[colors[1]-1][colors[2]-1]);
+      highlight(pgtoz[colors[1]-1][colors[2]-1]);
     }
     else if (colors[0]<=118) {
       table.setPixelColor(zpmap[colors[0]],table.Color(colors[1],colors[2],colors[3]));
@@ -131,6 +156,30 @@ void rainbowCycle(uint8_t wait) {
 }
 
 
+
+// Highlight
+// Perform a rainbowCycle on a single element called using pgtoz
+void highlight(uint8_t z) {
+  uint16_t i;
+
+  for(i=0; i<128; i++) {
+    table.setPixelColor(zpmap[z],table.Color(i,0,0));
+    table.show();
+    delay(1);
+  }
+  for(i=0; i<256; i++) {
+    table.setPixelColor(zpmap[z],Wheel(i));
+    table.show();
+    delay(1);
+  }
+  for(i=128; i>0; i--) {
+      table.setPixelColor(zpmap[z],table.Color(i,0,0));
+      table.show();
+      delay(1);
+  }  
+  table.setPixelColor(zpmap[z],table.Color(0,0,0));
+  table.show();
+}
 
 
 
