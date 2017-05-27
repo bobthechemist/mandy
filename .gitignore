@@ -13,3 +13,5 @@ ftee
 # Nothing useful in the arduino build directory
 arduino/build-uno/
 
+# VI swap files
+*.swp

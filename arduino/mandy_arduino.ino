@@ -50,7 +50,7 @@ void quickColor(uint32_t);
 void rainbowCycle(uint8_t);
 void highlight(uint8_t);
 uint32_t Wheel(byte);
-
+void sinewave(uint8_t, uint8_t); 
 
 void setup() {
   // Initialize serial
@@ -59,7 +59,6 @@ void setup() {
   table.begin();
   table.show(); // Initialize all pixels to 'off'
 
-  Serial.println(pgtoz[4][1]);
 }
 
 void loop() {
@@ -93,11 +92,11 @@ void loop() {
     else if (colors[0]==253) {
       colorWipe(table.Color(colors[1],colors[2],colors[3]),20);
     }
-    // Testing pgtoz
+    // sine wave through the periodic table
     else if (colors[0]==252) {
-      Serial.println(pgtoz[colors[1]-1][colors[2]-1]);
-      highlight(pgtoz[colors[1]-1][colors[2]-1]);
+      sinewave(colors[1],colors[2]);
     }
+    // Light a single element based on atomic number
     else if (colors[0]<=118) {
       table.setPixelColor(zpmap[colors[0]],table.Color(colors[1],colors[2],colors[3]));
     }
@@ -181,7 +180,20 @@ void highlight(uint8_t z) {
   table.show();
 }
 
+// Create a sine wave that moves across the periodic table
+void sinewave(uint8_t numloops, uint8_t wait) {
+  int i, p, g;
 
+  for (i=1; i<numloops*128; i++) {
+    for (p=1; p<=10; p++){
+      for(g=1; g<=18;g++){
+        table.setPixelColor(zpmap[pgtoz[p-1][g-1]],Wheel((g*10+p*10-2*i)%255));
+      }
+    }
+    table.show();
+    delay(wait);
+  }
+}
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
