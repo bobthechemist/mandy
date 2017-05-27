@@ -10,3 +10,6 @@ ftee
 # Wolfram notebooks (store as wl files)
 *.nb
 
+# Nothing useful in the arduino build directory
+arduino/build-uno/
+

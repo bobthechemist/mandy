@@ -28,6 +28,11 @@ boolean stringComplete = false;
 int inputPos = 0;
 boolean inputError = false; // Not used presently
 
+// Definitions
+void quickColor(uint32_t);
+void rainbowCycle(uint8_t); 
+void colorWipe(uint32_t, uint8_t);
+uint32_t Wheel(byte); 
 
 void setup() {
   // Initialize serial

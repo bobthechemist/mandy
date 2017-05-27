@@ -1,10 +1,10 @@
-#Mandy - the periodic table you can talk to
+# Mandy - the periodic table you can talk to
 
-##Introduction
+## Introduction
 Mandy is an interactive periodic table that takes voice commands to display various
 trends in the elements.  A (teaser) trailer can be found [here](https://youtu.be/eI-IgJ3n_RU).
 
-##Components
+## Components
 Mandy can be broken down into three components:
 
 - Simplified Command and Control (SCAC) a [minimalist speech recognition package](https://github.com/bobthechemist/scac) that I've designed which uses pocketsphinx
@@ -23,7 +23,7 @@ Cloned from [here](https://github.com/bobthechemist/python-mathlink) with the fo
 - Using version 11.0 of *Mathematica* 
 - Still need to copy the libML32i3.so library to /usr/local/lib
 
-##Directory Structure
+## Directory Structure
 - **arduino** has the arduino sketch(es) needed to control the neopixels.
 - **assets** are items used by SCAC for speech recognition and language model generation
 - **base** contains core files used by SCAC, such as the text-to-speech engine, which in Mandy's case is the LCD display.

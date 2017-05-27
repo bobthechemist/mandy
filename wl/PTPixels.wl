@@ -48,6 +48,13 @@ blankScreen[]:= Module[{},
 	DeviceWrite[$arduino,"255,0,0,0\n"];
 ];
 
+(* Sends a properly formatted command directly to Arduino, no error checking yet *)
+(* Not needed as it duplicates setElement[] *)
+sendCommand[s_String]:=Module[{},
+  Pause[$pauselength];
+  DeviceWrite[$arduino, s];
+];
+
 (* Some error checking will be needed here to ensure a proper string is sent. *)
 setElement[s_String]:=Module[{},
 	Pause[$pauselength];
