@@ -33,9 +33,9 @@ static int pgtoz[10][18]={
 
 
   
-  
+// Create table and set some global tricks  
 Adafruit_NeoPixel table = Adafruit_NeoPixel(ELEMENTS, PIN, NEO_GRB + NEO_KHZ800);
-
+uint32_t defaultColor = table.Color(0,255,0);
 
 // Serial setup
 #define INPUT_SIZE 15 // 4 - 3 digit values, comma delimited, no spaces
@@ -51,6 +51,11 @@ void rainbowCycle(uint8_t);
 void highlight(uint8_t);
 uint32_t Wheel(byte);
 void sinewave(uint8_t, uint8_t); 
+void whatColor(int);
+// v2.0 function declarations
+void atBlink(uint8_t, uint8_t, uint8_t);
+void atFade(uint8_t, uint8_t, uint8_t);
+void setDefaultColor(uint8_t, uint8_t, uint8_t);
 
 void setup() {
   // Initialize serial
@@ -67,11 +72,11 @@ void loop() {
     char *pch;
 
     pch = strtok (input, ",");
-    int colors[5];
-    int ci = 0;
+    int slots[5];
+    int si = 0;
     while (pch != NULL)
     {
-      colors[ci++] = atoi(pch);
+      slots[si++] = atoi(pch);
       pch = strtok (NULL, ",");
     }
     // clear the string:
@@ -79,26 +84,41 @@ void loop() {
     stringComplete = false;
     // Rudimentary error checking
     for(int i = 0; i<4; i++) {
-      if (colors[i] <0 || colors[i] > 255) colors[i] = 0;
+      if (slots[i] <0 || slots[i] > 255) slots[i] = 0;
     }
     // Should be OK to display colors
-    if (colors[0]==255) {
-      quickColor(table.Color(colors[1],colors[2],colors[3]));
+    if (slots[0]==255) {
+      quickColor(table.Color(slots[1],slots[2],slots[3]));
     }
-    else if (colors[0]==254){
+    else if (slots[0]==254){
       rainbowCycle(20); 
     }
     // Color wipe in atomic number order
-    else if (colors[0]==253) {
-      colorWipe(table.Color(colors[1],colors[2],colors[3]),20);
+    else if (slots[0]==253) {
+      colorWipe(table.Color(slots[1],slots[2],slots[3]),20);
     }
     // sine wave through the periodic table
-    else if (colors[0]==252) {
-      sinewave(colors[1],colors[2]);
+    else if (slots[0]==252) {
+      sinewave(slots[1],slots[2]);
+    }
+    else if (slots[0]==251) {
+      whatColor(slots[1]);
+    }
+    // Set the default color
+    else if (slots[0]==210) {
+      setDefaultColor(slots[1], slots[2], slots[3]);
+    }
+    // Blink a single element
+    else if (slots[0]==120) {
+      atBlink(slots[1],slots[2],slots[3]);
+    }
+    // Fade a single element
+    else if (slots[0]==121) {
+      atFade(slots[1],slots[2],slots[3]);
     }
     // Light a single element based on atomic number
-    else if (colors[0]<=118) {
-      table.setPixelColor(zpmap[colors[0]],table.Color(colors[1],colors[2],colors[3]));
+    else if (slots[0]<=118) {
+      table.setPixelColor(zpmap[slots[0]],table.Color(slots[1],slots[2],slots[3]));
     }
     table.show();
   }
@@ -209,3 +229,60 @@ uint32_t Wheel(byte WheelPos) {
   WheelPos -= 170;
   return table.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
+
+//print pixel information to serial
+void whatColor(int z) {
+  Serial.println(table.getPixelColor(zpmap[z]));
+}
+
+// *** ATOMIC TRICKS ***
+
+// atBlink blinks a single element
+void atBlink(uint8_t z, uint8_t numBlinks, uint8_t wait) {
+  uint8_t i;
+
+  if(z <= ELEMENTS) {
+    for (i = 0; i < numBlinks; i++) {
+      if(i%2) {
+        table.setPixelColor(zpmap[z],defaultColor);
+      }
+      else {
+        table.setPixelColor(zpmap[z],table.Color(0,0,0));
+      }
+      table.show();
+      // Multiply wait to allow for a 1 s delay (using wait = 200)
+      delay(5*wait);
+    }
+  }
+}
+
+// atFade fades a single element
+void atFade(uint8_t z, uint8_t numFades, uint8_t wait) {
+  uint8_t i;
+  uint8_t j;
+  uint8_t brightness;
+
+  if(z <= ELEMENTS) {
+    for (i = 0; i < numFades; i++) {
+      for (j = 0; j < 255; j++) {
+        if(j < 128) {
+          brightness = 2 * j;
+        }
+        else {
+          brightness = 255 - 2 * j;
+        }
+        table.setPixelColor(zpmap[z],table.Color(brightness,0,0));
+        table.show();
+        delay(wait);
+      }
+    }
+    table.setPixelColor(zpmap[z],table.Color(0,0,0));
+  }
+}
+// *** TABULAR TRICKS ***
+
+// *** GLOBAL TRICKS ***
+void setDefaultColor(uint8_t r, uint8_t g, uint8_t b) {
+  defaultColor = table.Color(r,g,b);
+}
+

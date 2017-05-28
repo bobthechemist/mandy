@@ -13,8 +13,9 @@ stopCommunication::usage = "closes serial communication to Arduino.";
 toByteRGB::usage = "Convert Mathematica 0-1 Real RGB values to 8-bit RGB value";
 display::usage = "Displays a property.";
 getColor::usage = "Returns the correct color.";
-
-
+listen::usage = "Returns the serial buffer.";
+getZColor::usage = "Returns a list of RGB values for the requested element.";
+setZColor::usage = "Sets element color using format [Z, {R, G, B}]";
 
 Begin["`Private`"];
 $pauselength = 0.010;
@@ -25,7 +26,7 @@ $numelements = 118; (* for debugging *)
 $propertyfile = "/home/pi/mandy/wl/elementdata.csv";
 $properties = Null;
 $maxbrightness = 64;
-$version = 170416;
+$version = 170528;
 
 (* Messages *)
 pixel::notconnected = "Requested pixel does not appear to be connected.";
@@ -50,6 +51,9 @@ blankScreen[]:= Module[{},
 
 (* Sends a properly formatted command directly to Arduino, no error checking yet *)
 (* Not needed as it duplicates setElement[] *)
+sendCommand[s0_Integer, s1_Integer, s2_Integer, s3_Integer]:=sendCommand[
+  StringJoin[ToString[s0],",",ToString[s1],",",ToString[s2],",",ToString[s3],"\n"]
+];
 sendCommand[s_String]:=Module[{},
   Pause[$pauselength];
   DeviceWrite[$arduino, s];
@@ -107,5 +111,26 @@ setBrightness[i_Integer]:=Module[{},
     64];
 ]
 
+listen[]:=Module[{},
+  Pause[$pauselength];
+  DeviceReadBuffer[$arduino]
+]
+
+getZColor[z_Integer]:=Module[{res},
+  (* clear buffer *)
+  listen[];
+  sendCommand["251,"<>ToString[z]<>",0,0\n"];
+  res = Drop[listen[],-2];
+  FromDigits[#,2]& /@ Partition[IntegerDigits[ToExpression@FromCharacterCode@res,2,24],8]
+]
+
+setZColor[z_Integer, r_Integer, g_Integer, b_Integer]:=setZColor[z, {r, g, b}];
+setZColor[z_Integer, rgb_List]:=Module[{noerr = True},
+  noerr = And[0<z<=118,If[Length@rgb == 3,
+    And@@Sequence[0<=#<256 & /@ rgb], False]];
+  If[noerr,
+    sendCommand[StringJoin[ToString[z],",",ToString/@Riffle[rgb,","],"\n"]];
+  ]
+]
 End[];
 EndPackage[];
