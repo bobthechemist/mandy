@@ -35,4 +35,9 @@ Mandy's Arduino recieves commands serially from its Rasbperry Pi, currently at 9
 
 ### Current tricks
 - 120: atBlink
+- 121: atFade 
+- 165: tbWash
+- 166: tbPaint
+- 167: tbWave
 - 210: setDefaultColor
+- 255: tbWash

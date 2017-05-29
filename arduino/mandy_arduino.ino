@@ -5,10 +5,9 @@
 
 // Use pin 6 for communication to neopixels
 #define PIN 6
-// Number of elements (will eventually be 118)
+// Number of elements 
 #define ELEMENTS 118
 // Map the atomic number to the correct pixel
-
 static int zpmap[] = {-1, 77, 0, 78, 89, 1, 2, 3, 4, 5, 6, 79, 88, 7, 8, 9, 10, 11, 12, 80, \
 87, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 13, 14, 15, 16, 17, 18, \
 81, 86, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 19, 20, 21, 22, 23, \
@@ -17,7 +16,7 @@ static int zpmap[] = {-1, 77, 0, 78, 89, 1, 2, 3, 4, 5, 6, 79, 88, 7, 8, 9, 10, 
 28, 29, 30, 83, 84, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, \
 102, 103, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 31, 32, 33, 34, 35, \
 36};
-
+// Map the period and group to atomic number
 static int pgtoz[10][18]={
   {1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2}, {3, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5, 6, 7, 8, 9, 
   10}, {11, 12, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 13, 14, 15, 
@@ -42,7 +41,9 @@ uint32_t defaultColor = table.Color(0,255,0);
 char input[INPUT_SIZE + 1];
 boolean stringComplete = false;
 int inputPos = 0;
-boolean inputError = false; // Not used presently
+
+// Tricks will be assigned in setup() to make loop() cleaner
+void (*trick[256]) ( uint8_t s1, uint8_t s2, uint8_t s3 );
 
 // function declarations
 void colorWipe(uint32_t, uint8_t);
@@ -50,16 +51,34 @@ void quickColor(uint32_t);
 void rainbowCycle(uint8_t);
 void highlight(uint8_t);
 uint32_t Wheel(byte);
-void sinewave(uint8_t, uint8_t); 
 void whatColor(int);
 // v2.0 function declarations
-void atBlink(uint8_t, uint8_t, uint8_t);
-void atFade(uint8_t, uint8_t, uint8_t);
-void setDefaultColor(uint8_t, uint8_t, uint8_t);
+void atBlink(uint8_t z, uint8_t numBlinks, uint8_t wait);
+void atFade(uint8_t z, uint8_t numFades, uint8_t wait);
+void tbWash(uint8_t r, uint8_t g, uint8_t b);
+void tbWave(uint8_t unused, uint8_t numLoops, uint8_t wait);
+void tbPaint(uint8_t unused, uint8_t unused2, uint8_t wait);
+void setDefaultColor(uint8_t r, uint8_t g, uint8_t b);
+
+// get pixel number from period and group
 
 void setup() {
   // Initialize serial
   Serial.begin(9600);
+
+  // Initialize tricks
+
+  // Avoid core dumps for undefined tricks
+  for (int i = 0; i < 256; i++ ) { trick[i] = NULL; }
+  // Defined tricks
+  trick[120] = atBlink;
+  trick[121] = atFade;
+  trick[165] = tbWash;
+  trick[166] = tbPaint;
+  trick[167] = tbWave;
+  trick[210] = setDefaultColor;
+  trick[255] = tbWash; //Backwards compatible with wolfram blankScreen[]
+
   // Initialize table
   table.begin();
   table.show(); // Initialize all pixels to 'off'
@@ -82,45 +101,16 @@ void loop() {
     // clear the string:
     inputPos = 0;
     stringComplete = false;
-    // Rudimentary error checking
-    for(int i = 0; i<4; i++) {
-      if (slots[i] <0 || slots[i] > 255) slots[i] = 0;
-    }
-    // Should be OK to display colors
-    if (slots[0]==255) {
-      quickColor(table.Color(slots[1],slots[2],slots[3]));
-    }
-    else if (slots[0]==254){
-      rainbowCycle(20); 
-    }
-    // Color wipe in atomic number order
-    else if (slots[0]==253) {
-      colorWipe(table.Color(slots[1],slots[2],slots[3]),20);
-    }
-    // sine wave through the periodic table
-    else if (slots[0]==252) {
-      sinewave(slots[1],slots[2]);
-    }
-    else if (slots[0]==251) {
-      whatColor(slots[1]);
-    }
-    // Set the default color
-    else if (slots[0]==210) {
-      setDefaultColor(slots[1], slots[2], slots[3]);
-    }
-    // Blink a single element
-    else if (slots[0]==120) {
-      atBlink(slots[1],slots[2],slots[3]);
-    }
-    // Fade a single element
-    else if (slots[0]==121) {
-      atFade(slots[1],slots[2],slots[3]);
-    }
-    // Light a single element based on atomic number
-    else if (slots[0]<=118) {
+    
+    // Perform requested trick
+    if(slots[0] <= 118) {
       table.setPixelColor(zpmap[slots[0]],table.Color(slots[1],slots[2],slots[3]));
+      table.show();
     }
-    table.show();
+    else {
+      // Assumes these tricks will show the table
+      (*trick[slots[0]])(slots[1], slots[2], slots[3]);
+    }
   }
 
 }
@@ -149,17 +139,6 @@ void colorWipe(uint32_t c, uint8_t wait) {
     delay(wait);
   }
 }
-
-
-
-// Quick fill
-void quickColor(uint32_t c) {
-  for(uint16_t i=0; i<table.numPixels(); i++) {
-    table.setPixelColor(i,c);
-  }
-  table.show();
-}
-
 
 // Keep for "screen saver"
 void rainbowCycle(uint8_t wait) {
@@ -200,20 +179,6 @@ void highlight(uint8_t z) {
   table.show();
 }
 
-// Create a sine wave that moves across the periodic table
-void sinewave(uint8_t numloops, uint8_t wait) {
-  int i, p, g;
-
-  for (i=1; i<numloops*128; i++) {
-    for (p=1; p<=10; p++){
-      for(g=1; g<=18;g++){
-        table.setPixelColor(zpmap[pgtoz[p-1][g-1]],Wheel((g*10+p*10-2*i)%255));
-      }
-    }
-    table.show();
-    delay(wait);
-  }
-}
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
@@ -258,29 +223,57 @@ void atBlink(uint8_t z, uint8_t numBlinks, uint8_t wait) {
 
 // atFade fades a single element
 void atFade(uint8_t z, uint8_t numFades, uint8_t wait) {
-  uint8_t i;
-  uint8_t j;
-  uint8_t brightness;
+  int i;
+  float j;
 
-  if(z <= ELEMENTS) {
-    for (i = 0; i < numFades; i++) {
-      for (j = 0; j < 255; j++) {
-        if(j < 128) {
-          brightness = 2 * j;
-        }
-        else {
-          brightness = 255 - 2 * j;
-        }
-        table.setPixelColor(zpmap[z],table.Color(brightness,0,0));
-        table.show();
-        delay(wait);
-      }
+
+  table.setPixelColor(zpmap[z],defaultColor);
+  for(i=0; i<numFades; i++){
+    for(j=1; j>=0; j-=0.1) {
+      table.setPixelColor(zpmap[z],table.Color((uint8_t)(j*255),0,0));
+      table.show();
+      delay(5*wait);
     }
-    table.setPixelColor(zpmap[z],table.Color(0,0,0));
+    for(j=0; j<=1; j+=0.1) {
+      table.setPixelColor(zpmap[z],table.Color((uint8_t)(j*255),0,0));
+      table.show();
+      delay(5*wait);
+    }
   }
 }
-// *** TABULAR TRICKS ***
 
+// *** TABULAR TRICKS ***
+void tbWash(uint8_t r, uint8_t g, uint8_t b){
+  for(uint8_t i=0; i<table.numPixels(); i++) {
+    table.setPixelColor(i,table.Color(r,g,b));
+  }
+  table.show();
+
+}
+
+// Create a sine wave that moves across the periodic table
+void tbWave(uint8_t unused, uint8_t numLoops, uint8_t wait) {
+  int i, p, g;
+
+  for (i=1; i<numLoops*128; i++) {
+    for (p=1; p<=10; p++){
+      for(g=1; g<=18;g++){
+        table.setPixelColor(zpmap[pgtoz[p-1][g-1]],Wheel((g*10+p*10-2*i)%255));
+      }
+    }
+    table.show();
+    delay(wait);
+  }
+}
+
+// Paints the table the default color, one element at a time
+void tbPaint(uint8_t unused, uint8_t unused2, uint8_t wait) {
+  for(uint8_t z=1; z<=118; z++) {
+    table.setPixelColor(zpmap[z], defaultColor);
+    table.show();
+    delay(wait);
+  }
+}
 // *** GLOBAL TRICKS ***
 void setDefaultColor(uint8_t r, uint8_t g, uint8_t b) {
   defaultColor = table.Color(r,g,b);
