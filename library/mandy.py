@@ -142,6 +142,36 @@ def block():
   getresult()
   return "Displaying blocks\n\ns=red p=blue\nd=green f=purple"
 
+def stableisotopes():
+  sendexpression("display[13]")
+  getresult()
+  return "Displaying # of\nstable isotopes."
+
+def humanabundance():
+  sendexpression("display[14]")
+  getresult()
+  return "Displaying\nelements in\nyour body."
+
+def electronaffinity():
+  sendexpression("display[15]")
+  getresult()
+  return "Displaying\nelectron affinity\n"
+
+def thermalconductivity():
+  sendexpression("display[16]")
+  getresult()
+  return "Displaying\nthermal\nconductivity."
+
+def electricalconductivity():
+  sendexpression("display[17]")
+  getresult()
+  return "Displaying\nelectrical\nconductivity."
+
+def hardness():
+  sendexpression("display[18]")
+  getresult()
+  return "Displaying\nhardness."
+
 def blank():
   sendexpression("blankScreen[]")
   getresult()

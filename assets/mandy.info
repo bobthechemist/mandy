@@ -10,6 +10,12 @@ MOLAR VOLUME, molarvolume
 PHASE, phase
 DISCOVERY YEAR, discoveryyear
 BLOCK, block
+STABLE ISOTOPES, stableisotopes
+HUMAN ABUNDANCE, humanabundance
+ELECTRON AFFINITY, electronaffinity
+THERMAL CONDUCTIVITY, thermalconductivity
+ELECTRICAL CONDUCTIVITY, electricalconductivity
+HARDNESS, hardness
 NOTHING, blank
 SHUTDOWN, shutdown
 RESTART, restart

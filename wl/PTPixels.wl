@@ -99,7 +99,7 @@ getColor[x_]:=Module[{return},
 		If[MemberQ[ColorData["Gradients"],$color],
 			ColorData[$color][x],
 			(* 0.8 is to avoid min and max being the same color (red) *)
-			ColorConvert[Hue[0.8 x],"RGB"]
+			ColorConvert[Hue[x],"RGB"]
 		]
 		
 	]

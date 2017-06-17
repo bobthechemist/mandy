@@ -43,22 +43,30 @@ boolean stringComplete = false;
 int inputPos = 0;
 
 // Tricks will be assigned in setup() to make loop() cleaner
-void (*trick[256]) ( uint8_t s1, uint8_t s2, uint8_t s3 );
+void (*trick[256]) ( uint8_t s1, uint8_t s2, uint8_t s3 ) = {NULL};
 
 // function declarations
-void colorWipe(uint32_t, uint8_t);
-void quickColor(uint32_t);
+// - tricks prefixed with at (atomic), tb (tabular) or gl (global)
+// - functions that are not tricks do not have a prefix
 void rainbowCycle(uint8_t);
 void highlight(uint8_t);
 uint32_t Wheel(byte);
 void whatColor(int);
+int pgtop(int p, int g); // Traverse pg and ztop maps 
+
 // v2.0 function declarations
 void atBlink(uint8_t z, uint8_t numBlinks, uint8_t wait);
 void atFade(uint8_t z, uint8_t numFades, uint8_t wait);
 void tbWash(uint8_t r, uint8_t g, uint8_t b);
 void tbWave(uint8_t unused, uint8_t numLoops, uint8_t wait);
 void tbPaint(uint8_t unused, uint8_t unused2, uint8_t wait);
-void setDefaultColor(uint8_t r, uint8_t g, uint8_t b);
+void glDefaultColor(uint8_t r, uint8_t g, uint8_t b);
+
+/* *** TEST AREA *** */
+void test(uint8_t s1, uint8_t s2, uint8_t s3) {
+}
+
+/* *** END TEST AREA *** */
 
 // get pixel number from period and group
 
@@ -68,15 +76,12 @@ void setup() {
 
   // Initialize tricks
 
-  // Avoid core dumps for undefined tricks
-  for (int i = 0; i < 256; i++ ) { trick[i] = NULL; }
-  // Defined tricks
   trick[120] = atBlink;
   trick[121] = atFade;
   trick[165] = tbWash;
   trick[166] = tbPaint;
   trick[167] = tbWave;
-  trick[210] = setDefaultColor;
+  trick[210] = glDefaultColor;
   trick[255] = tbWash; //Backwards compatible with wolfram blankScreen[]
 
   // Initialize table
@@ -131,14 +136,6 @@ void serialEvent() {
 
 }
 
-// Fill the dots one after the other with a color
-void colorWipe(uint32_t c, uint8_t wait) {
-  for(uint16_t z=1; z<=118; z++) {
-    table.setPixelColor(zpmap[z], c);
-    table.show();
-    delay(wait);
-  }
-}
 
 // Keep for "screen saver"
 void rainbowCycle(uint8_t wait) {
@@ -200,6 +197,19 @@ void whatColor(int z) {
   Serial.println(table.getPixelColor(zpmap[z]));
 }
 
+int pgtop(int p, int g) {
+  int temp = -1;
+  if (p <= 10 && g <= 18){
+    temp = pgtoz[p-1][g-1];
+  }
+  if (temp != -1 ) {
+    return zpmap[temp];
+  }
+  else {
+    return -1;
+  }
+}
+
 // *** ATOMIC TRICKS ***
 
 // atBlink blinks a single element
@@ -209,10 +219,10 @@ void atBlink(uint8_t z, uint8_t numBlinks, uint8_t wait) {
   if(z <= ELEMENTS) {
     for (i = 0; i < numBlinks; i++) {
       if(i%2) {
-        table.setPixelColor(zpmap[z],defaultColor);
+        table.setPixelColor(zpmap[z],table.Color(0,0,0));
       }
       else {
-        table.setPixelColor(zpmap[z],table.Color(0,0,0));
+        table.setPixelColor(zpmap[z],defaultColor);
       }
       table.show();
       // Multiply wait to allow for a 1 s delay (using wait = 200)
@@ -258,7 +268,8 @@ void tbWave(uint8_t unused, uint8_t numLoops, uint8_t wait) {
   for (i=1; i<numLoops*128; i++) {
     for (p=1; p<=10; p++){
       for(g=1; g<=18;g++){
-        table.setPixelColor(zpmap[pgtoz[p-1][g-1]],Wheel((g*10+p*10-2*i)%255));
+        //table.setPixelColor(zpmap[pgtoz[p-1][g-1]],Wheel((g*10+p*10-2*i)%255));
+        table.setPixelColor(pgtop(p,g),Wheel((g*10+p*10-2*i)%255));
       }
     }
     table.show();
@@ -275,7 +286,8 @@ void tbPaint(uint8_t unused, uint8_t unused2, uint8_t wait) {
   }
 }
 // *** GLOBAL TRICKS ***
-void setDefaultColor(uint8_t r, uint8_t g, uint8_t b) {
+void glDefaultColor(uint8_t r, uint8_t g, uint8_t b) {
   defaultColor = table.Color(r,g,b);
 }
+
 
