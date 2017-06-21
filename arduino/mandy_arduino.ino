@@ -42,6 +42,9 @@ char input[INPUT_SIZE + 1];
 boolean stringComplete = false;
 int inputPos = 0;
 
+// Will only perform an update if flag is set
+boolean update = true;
+
 // Tricks will be assigned in setup() to make loop() cleaner
 void (*trick[256]) ( uint8_t s1, uint8_t s2, uint8_t s3 ) = {NULL};
 
@@ -61,6 +64,7 @@ void tbWash(uint8_t r, uint8_t g, uint8_t b);
 void tbWave(uint8_t unused, uint8_t numLoops, uint8_t wait);
 void tbPaint(uint8_t unused, uint8_t unused2, uint8_t wait);
 void glDefaultColor(uint8_t r, uint8_t g, uint8_t b);
+void glSetUpdateFlag(uint8_t value, uint8_t show, uint8_t unused2);
 
 /* *** TEST AREA *** */
 void test(uint8_t s1, uint8_t s2, uint8_t s3) {
@@ -72,7 +76,7 @@ void test(uint8_t s1, uint8_t s2, uint8_t s3) {
 
 void setup() {
   // Initialize serial
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Initialize tricks
 
@@ -82,6 +86,7 @@ void setup() {
   trick[166] = tbPaint;
   trick[167] = tbWave;
   trick[210] = glDefaultColor;
+  trick[211] = glSetUpdateFlag;
   trick[255] = tbWash; //Backwards compatible with wolfram blankScreen[]
 
   // Initialize table
@@ -110,7 +115,7 @@ void loop() {
     // Perform requested trick
     if(slots[0] <= 118) {
       table.setPixelColor(zpmap[slots[0]],table.Color(slots[1],slots[2],slots[3]));
-      table.show();
+      if (update) table.show();
     }
     else {
       // Assumes these tricks will show the table
@@ -290,4 +295,13 @@ void glDefaultColor(uint8_t r, uint8_t g, uint8_t b) {
   defaultColor = table.Color(r,g,b);
 }
 
+void glSetUpdateFlag(uint8_t value, uint8_t show, uint8_t unused2) {
+  if (value == 0) {
+    update = false;
+  }
+  else {
+    update = true;
+    if (show) table.show();
+  }
+}
 

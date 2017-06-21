@@ -33,7 +33,7 @@ pixel::notconnected = "Requested pixel does not appear to be connected.";
 
 (* Add check to see if connection active, flag to force reconnect and error messages *) 
 startCommunication[port_String]:= Module[{},
-	$arduino = DeviceOpen["Serial",port];
+	$arduino = DeviceOpen["Serial",{port, "BaudRate"->115200}];
 	loadElementData[];
 
 ];
@@ -50,12 +50,14 @@ blankScreen[]:= Module[{},
 ];
 
 (* Sends a properly formatted command directly to Arduino, no error checking yet *)
-(* Not needed as it duplicates setElement[] *)
-sendCommand[s0_Integer, s1_Integer, s2_Integer, s3_Integer]:=sendCommand[
-  StringJoin[ToString[s0],",",ToString[s1],",",ToString[s2],",",ToString[s3],"\n"]
+(* Note duplication with setElment *)
+Options[sendCommand] = {"PauseMultiplier"->1};
+sendCommand[s0_Integer, s1_Integer, s2_Integer, s3_Integer, opts : OptionsPattern[]]:=sendCommand[
+  StringJoin[ToString[s0],",",ToString[s1],",",ToString[s2],",",ToString[s3],"\n"],
+  opts
 ];
-sendCommand[s_String]:=Module[{},
-  Pause[$pauselength];
+sendCommand[s_String, opts: OptionsPattern[]]:=Module[{},
+  Pause[$pauselength OptionValue["PauseMultiplier"]];
   DeviceWrite[$arduino, s];
 ];
 
