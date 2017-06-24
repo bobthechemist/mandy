@@ -63,6 +63,7 @@ void atFade(uint8_t z, uint8_t numFades, uint8_t wait);
 void tbWash(uint8_t r, uint8_t g, uint8_t b);
 void tbWave(uint8_t unused, uint8_t numLoops, uint8_t wait);
 void tbPaint(uint8_t unused, uint8_t unused2, uint8_t wait);
+void glGetPixelColor(uint8_t z, uint8_t unused, uint8_t unused2);
 void glDefaultColor(uint8_t r, uint8_t g, uint8_t b);
 void glSetUpdateFlag(uint8_t value, uint8_t show, uint8_t unused2);
 
@@ -87,6 +88,7 @@ void setup() {
   trick[167] = tbWave;
   trick[210] = glDefaultColor;
   trick[211] = glSetUpdateFlag;
+  trick[251] = glGetPixelColor;
   trick[255] = tbWash; //Backwards compatible with wolfram blankScreen[]
 
   // Initialize table
@@ -302,6 +304,15 @@ void glSetUpdateFlag(uint8_t value, uint8_t show, uint8_t unused2) {
   else {
     update = true;
     if (show) table.show();
+  }
+}
+
+void glGetPixelColor(uint8_t z, uint8_t unused, uint8_t unused2) {
+  if (z <= 118) {
+    Serial.println(table.getPixelColor(zpmap[z]));
+  }
+  else {
+    Serial.println(-1);
   }
 }
 
