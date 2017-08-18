@@ -90,87 +90,87 @@ if __name__ == "__main__":
 def atomicweight():
   sendexpression("display[2]")
   getresult()
-  return "Displaying atomic\nweight.\nRed=low\nPurple=High"
+  return "Displaying\natomic weight.\n\nRed=high Purple=low"
 
 def atomicradius():
   sendexpression("display[3]")
   getresult()
-  return "Displaying atomic\nradius.\nRed=small\nPurple=large"
+  return "Displaying\natomic radius.\n\nRed=large Purple=small"
 
 def boilingpoint():
   sendexpression("display[4]")
   getresult()
-  return "Displaying boiling\npoint.\nRed=low\nPurple=High"
+  return "Displaying\nboiling point.\n\nRed=high Purple=low"
 
 def density():
   sendexpression("display[5]")
   getresult()
-  return "Displaying\ndensity\nRed=low\nPurple=High"
+  return "Displaying\ndensity.\n\nRed=high Purple=low"
 
 def electronegativity():
   sendexpression("display[6]")
   getresult()
-  return "Displaying\nelectronegativity\nRed=low\nPurple=High"
+  return "Displaying\nelectronegativity.\n\nRed=high Purple=low"
 
 def ionizationenergy():
   sendexpression("display[7]")
   getresult()
-  return "Displaying\nionization energy\nRed=low\nPurple=High"
+  return "Displaying\nionization energy.\n\nRed=high Purple=low"
 
 def meltingpoint():
   sendexpression("display[8]")
   getresult()
-  return "Displaying melting\npoint.\nRed=low\nPurple=High"
+  return "Displaying\nmelting point.\n\nRed=high Purple=low"
 
 def molarvolume():
   sendexpression("display[9]")
   getresult()
-  return "Displaying molar\nvolume.\nRed=low\nPurple=High"
+  return "Displaying\nmolar volume.\n\nRed=high Purple=low"
 
 def phase():
   sendexpression("display[10]")
   getresult()
-  return "Displaying phase\nsolid=?\nliquid=\ngas=?"
+  return "Displaying phase.\nPurple=solid\nGreen=liquid\nRed=gas"
 
 def discoveryyear():
   sendexpression("display[11]")
   getresult()
-  return "Displaying discovery\nyear.\nRed=early\nPurple=late"
+  return "Displaying\ndiscovery year.\n\nRed=old Purple=new"
 
 def block():
   sendexpression("display[12]")
   getresult()
-  return "Displaying blocks\n\ns=red p=blue\nd=green f=purple"
+  return "Displaying blocks.\n\nPurple=s Blue=p\nYellow=d Red=f"
 
 def stableisotopes():
   sendexpression("display[13]")
   getresult()
-  return "Displaying # of\nstable isotopes."
+  return "Displaying # of\nstable isotopes.\n\nRed=1 Purple=10"
 
 def humanabundance():
   sendexpression("display[14]")
   getresult()
-  return "Displaying\nelements in\nyour body."
+  return "Displaying elements\nin your body.\n\nRed=high Purple=low"
 
 def electronaffinity():
   sendexpression("display[15]")
   getresult()
-  return "Displaying\nelectron affinity\n"
+  return "Displaying\nelectron affinity.\n\nRed=high Purple=low"
 
 def thermalconductivity():
   sendexpression("display[16]")
   getresult()
-  return "Displaying\nthermal\nconductivity."
+  return "Displaying\nthermal\nconductivity.\nRed=high Purple=low"
 
 def electricalconductivity():
   sendexpression("display[17]")
   getresult()
-  return "Displaying\nelectrical\nconductivity."
+  return "Displaying\nelectrical\nconductivity.\nRed=high Purple=low"
 
 def hardness():
   sendexpression("display[18]")
   getresult()
-  return "Displaying\nhardness."
+  return "Displaying\nhardness.\n\nRed=high Purple=low"
 
 def blank():
   sendexpression("blankScreen[]")

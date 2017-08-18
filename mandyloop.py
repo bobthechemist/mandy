@@ -4,6 +4,9 @@ from base.helper import *
 from library.mandy import *
 import os
 import signal
+# Needed for random display
+import time
+import random
 
 # Handle SIGINT and SIGTERM gracefully
 def sig_handler(signum, frame):
@@ -22,6 +25,7 @@ wlstart()
 corpus = "mandy"
 
 # Define the TTS engine
+# only tts.lcdspeak works with Mandy
 say = tts.lcdspeak
 tts.lcdinit()
 
@@ -66,14 +70,39 @@ print "*** Mandy is listening..."
 #   since it is also needed to start pocketsphinx
 spipe = open('/tmp/speech')
 
+# Create sublist of display functions
+displayopts = fdict.keys()
+for i in ['SHUTDOWN', 'RESTART', 'NOTHING', 'HELLO MANDY']:
+  displayopts.remove(i)
+latent = time.time()
+#say("I'm bored.", 0.0, 0.0, 1.0)
+#time.sleep(2)
+#say(locals()[fdict[random.choice(displayopts)]](), 0.0, 1.0, 0.0)
+#os._exit(1)
+
+# Set a latency variable 
+latent = time.time()
+
 # Main loop 
 while True:
   waiting = True
+
 # - Read a line from the speech pipe, looking for the keyphrase
   while waiting:
+    # Display random trend
+    if time.time() - latent > 180:
+      latent = time.time()
+      say("I'm bored", 0.0, 0.0, 0.0)
+      say(locals()[fdict[random.choice(displayopts)]](), 0.0, 1.0, 0.0)
+
+    # Read a line from the speechpipe
+    # This command is blocking and script will halt here in a silent room.
     line = spipe.readline().rstrip()
+    # Check to see if the line was the keyphrase
     if line == keyphrase: 
       waiting = False
+      # Reset latency timer
+      latent = time.time()
       say("What would you like\n\nto see?", 0.0, 1.0, 1.0)
 
 # - When keyphrase is found start looking for a command
