@@ -2,6 +2,7 @@ import sys
 import os
 from mathlink import *
 from time import sleep
+from base import *
 
 def qanda():
   "Performs one In/Out cycle"
@@ -95,7 +96,7 @@ def atomicweight():
 def atomicradius():
   sendexpression("display[3]")
   getresult()
-  return "Displaying\natomic radius.\n\nRed=large Purple=small"
+  return "Displaying\natomic radius.\nRed=large\nPurple=small"
 
 def boilingpoint():
   sendexpression("display[4]")
@@ -186,3 +187,40 @@ def restart():
   sendexpression("blankScreen[]")
   os.system("sudo shutdown -r now")
   return "Restarting..."
+
+def story():
+  s = tts.lcdspeak
+  sendexpression("blankScreen[]")
+  getresult()
+  s("We learn that the\n metallic character\n of elements\n increases towards", 0.0, 1.0, 1.0)
+  sleep(5)
+  s("Francium.\n\nBut is this true?", 0.0, 1.0, 1.0)
+  sendexpression("sendCommand[121,87,3,20]")
+  getresult()
+  sleep(5)
+  s("We also learn that\n metals have\n several\n properties.", 0.0, 1.0, 1.0)
+  sleep(5)
+  s("They have high\n thermal conduc-\n tivity, and silver\n has the highest.", 0.0, 1.0, 1.0)
+  sendexpression("display[16]")
+  getresult()
+  sleep(5)
+  s("They conduct\n electricity well\n too, and silver\n wins again.", 0.0, 1.0, 1.0)
+  sendexpression("display[17]")
+  getresult()
+  sleep(5)
+  s("Metals typically\n have high boiling\n points, like the\n 3rd row d-block.", 0.0, 1.0, 1.0)
+  sendexpression("display[4]")
+  getresult()
+  sleep(5)
+  s("The heavy trans-\n ition metals are\n also the densest.", 0.0, 1.0, 1.0)
+  sendexpression("display[5]")
+  getresult()
+  sleep(5)
+  s("If we put all of\n that information\n together, we get a\n new trend...", 0.0, 1.0, 1.0)
+  sendexpression("story[1]")
+  getresult()
+  sleep(5)
+  s("...and observe\n that the noble\n metals are the\n most metallic.", 0.0, 1.0, 1.0)
+  sleep(5)
+  return "The End"
+

@@ -16,6 +16,7 @@ getColor::usage = "Returns the correct color.";
 listen::usage = "Returns the serial buffer.";
 getZColor::usage = "Returns a list of RGB values for the requested element.";
 setZColor::usage = "Sets element color using format [Z, {R, G, B}]";
+story::usage = "One of several storys that Mandy knows."
 
 Begin["`Private`"];
 $pauselength = 0.010;
@@ -134,5 +135,24 @@ setZColor[z_Integer, rgb_List]:=Module[{noerr = True},
     sendCommand[StringJoin[ToString[z],",",ToString/@Riffle[rgb,","],"\n"]];
   ]
 ]
+
+(* Story data *)
+story[1] := Module[{a,b,c,d},
+  (* The most metallic elements *)
+  (* Creates a subset of ranked data: BP, Dens, Th and Elec conduc *)
+  a = Select[$properties[[2;;,{1,4,5,16,17}]], !MemberQ[#,-1]&];
+  (* Create an averaged datafield *)
+  b = {First@#, Mean@Rest@#} & /@ a;
+  (* Rescales the data *)
+  c = With[{limits = MinMax@b[[All,2]]}, {#[[1]], Rescale[#[[2]], limits, {0,0.75}]} & /@ b];
+  (* Clear the display *)
+  blankScreen[];
+  (* Show the results *)
+  d = Map[formatCommand[#[[1]],
+				getColor[#[[2]]]] &, 
+					RandomSample@c];
+  setElement/@ d;
+]
+
 End[];
 EndPackage[];

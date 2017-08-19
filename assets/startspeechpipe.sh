@@ -4,7 +4,8 @@ BASE=/home/pi/mandy/assets
 PIPENAME=/tmp/speech
 FTEELOC=$BASE/ftee
 ADCDEV=plughw:1,0
-CORPUS=3271
+#was 3271
+CORPUS=manual
 #LOG=/tmp/speech.log
 LOG=/tmp/speech.log
 

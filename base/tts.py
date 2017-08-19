@@ -31,7 +31,7 @@ def lcdinit():
     lcd_d7, lcd_columns, lcd_rows, lcd_red, lcd_green, lcd_blue)
   lcd.clear()
   lcd.set_color(1.0, 0.0, 1.0)
-  lcd.message("Hi! I'm Mandy,\n the bright\nperiodic table.\nSpeak to me.")
+  lcd.message("   Hi! I'm Mandy.\n\n  Say hello to me.")
 
 def lcdspeak(*var):
   global lcd

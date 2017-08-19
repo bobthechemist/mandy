@@ -25,7 +25,6 @@ wlstart()
 corpus = "mandy"
 
 # Define the TTS engine
-# only tts.lcdspeak works with Mandy
 say = tts.lcdspeak
 tts.lcdinit()
 
@@ -74,14 +73,15 @@ spipe = open('/tmp/speech')
 displayopts = fdict.keys()
 for i in ['SHUTDOWN', 'RESTART', 'NOTHING', 'HELLO MANDY']:
   displayopts.remove(i)
-latent = time.time()
-#say("I'm bored.", 0.0, 0.0, 1.0)
-#time.sleep(2)
-#say(locals()[fdict[random.choice(displayopts)]](), 0.0, 1.0, 0.0)
-#os._exit(1)
 
 # Set a latency variable 
 latent = time.time()
+
+# TEST AREA
+#say(story(), 1.0, 1.0, 0.0)
+#time.sleep(2)
+#os._exit(1)
+
 
 # Main loop 
 while True:
@@ -103,7 +103,7 @@ while True:
       waiting = False
       # Reset latency timer
       latent = time.time()
-      say("What would you like\n\nto see?", 0.0, 1.0, 1.0)
+      say("   What would you\n    like to see?", 0.0, 1.0, 1.0)
 
 # - When keyphrase is found start looking for a command
   line = spipe.readline().rstrip()
