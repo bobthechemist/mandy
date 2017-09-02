@@ -12,12 +12,14 @@ setBrightness::usage = "Change the maximum brightness of pixels";
 stopCommunication::usage = "closes serial communication to Arduino.";
 toByteRGB::usage = "Convert Mathematica 0-1 Real RGB values to 8-bit RGB value";
 display::usage = "Displays a property.";
+display2::usage = "Test new display.";
 getColor::usage = "Returns the correct color.";
 listen::usage = "Returns the serial buffer.";
 getZColor::usage = "Returns a list of RGB values for the requested element.";
 setZColor::usage = "Sets element color using format [Z, {R, G, B}]";
-story::usage = "One of several storys that Mandy knows."
-
+story::usage = "One of several storys that Mandy knows.";
+notNumericQ::usage = "Opposite of NumericQ.";
+mandyRescale::usage = "Rescale after deleting non-numeric values.";
 Begin["`Private`"];
 $pauselength = 0.010;
 $color = "Hue";
@@ -25,9 +27,12 @@ $arduino = Null;
 $numelements = 118; (* for debugging *)
 (* Full path to make integration with other programs easier *)
 $propertyfile = "/home/pi/mandy/wl/elementdata.csv";
+$associationfile = "/home/pi/mandy/wl/rawelementdata.wl";
 $properties = Null;
+$dataset = Null;
 $maxbrightness = 64;
-$version = 170528;
+$storydata = Null;
+$version = 170820;
 
 (* Messages *)
 pixel::notconnected = "Requested pixel does not appear to be connected.";
@@ -72,6 +77,7 @@ setElement[s_String]:=Module[{},
 (* Shouldn't need to be called by end user *)
 loadElementData[]:= Module[{},
 	$properties = Import[$propertyfile];
+  $dataset = Dataset[Get@$associationfile]; 
 ]
 
 (* Takes an RGBColor and converts it to a list of 8-bit integers *)
@@ -86,6 +92,7 @@ formatCommand[z_Integer,col_RGBColor]:= Module[{str},
 ]
 
 (* Requires a valid integer corresponding to a column in $properties or returns a blank screen *)
+(* Overload with display[prop_List] to send custom displays *)
 display[prop_Integer]:= Module[{cmd},
 	blankScreen[];
 	If[1 < prop <= Length[$properties[[1]]],
@@ -96,12 +103,20 @@ display[prop_Integer]:= Module[{cmd},
 	]
 ]
 
+display2[data_]:=Module[{cmd},
+  blankScreen[];
+  cmd = MapIndexed[formatCommand[#2[[1]],
+    getColor[#1]]&,
+    data];
+  setElement/@RandomSample@cmd;
+]
+
+
 getColor[x_]:=Module[{return},
 	return = If[x==-1,
 		RGBColor[0., 0., 0.],
 		If[MemberQ[ColorData["Gradients"],$color],
 			ColorData[$color][x],
-			(* 0.8 is to avoid min and max being the same color (red) *)
 			ColorConvert[Hue[x],"RGB"]
 		]
 		
@@ -152,6 +167,61 @@ story[1] := Module[{a,b,c,d},
 				getColor[#[[2]]]] &, 
 					RandomSample@c];
   setElement/@ d;
+]
+
+(* Helper functions for new display function *)
+
+(* Not used here, but in creating dataset so here for documenation only *)
+removeFormatting[x_] := Module[{},
+  Switch[Head@x,
+    Quantity, QuantityMagnitude@x,
+    DateObject, x["Year"],
+    (* Phase is in an EntityClass *)
+    EntityClass, x[[2]],
+    List, removeFormatting /@ x,
+    _, x
+  ]
+]
+
+notNumericQ[x_] := Not[NumericQ[x]];
+
+Options[mandyRescale] = {"subvalue" -> Missing[]};
+mandyRescale[x_, range_, OptionsPattern[]] := Module[{minmax},
+  minmax = MinMax@DeleteCases[x, _?notNumericQ];
+  If[NumericQ@#,
+    Rescale[#, minmax, range],
+    OptionValue["subvalue"]]& /@ x
+]
+
+(* STORY: Where are you from? *)
+(* Thinking about the story structure.  WL is used for displaying Table elements and python is used for displaying to the LCD.  This doesn't make a tremendous amount of sense but I don't have an alternative at the moment. I envision WL code to be the story 'slides' so a call would be story[<storyID>,<slideID>].*)
+
+story[2,slide_]:=Module[{notNumeriQ,f,ds, dsr, compare, dsrr, sl, cmd},
+  (* Helper functions*)
+  notNumericQ[x_]:=Not[NumericQ[x]];
+  f[x_,y_]:=If[And[NumericQ[x],NumericQ[y]],x/y,Missing[]];
+
+  (* Make story data *)
+  ds = $elementassociation[All,{"HumanAbundance", "OceanAbundance", "SolarAbundance","CrustAbundance","MeteoriteAbundance"}, (Log10@QuantityMagnitude[#]/._?notNumericQ:>Missing[])&];
+  compare = ds[All,"HumanAbundance",Rescale[#,{-15,0},{0,0.75}]/.{_?notNumericQ:>-1}&];
+  dsr = ds[All, <|
+    "Ocean"->(f[#HumanAbundance,#OceanAbundance]&),
+    "Solar"->(f[#HumanAbundance,#SolarAbundance]&),
+    "Crust"->(f[#HumanAbundance,#CrustAbundance]&),
+    "Meteorite"->(f[#HumanAbundance,#CrustAbundance]&)
+    |>];
+  dsrr=dsr[All,All,Rescale[#,{0.1,2},{0.75,0}]/.{_?notNumericQ:>-1,_?(#<0&):>0}&];
+
+  (* Generate story slides *)
+  (*
+  sl = <| 1->compare, 2->dsr["Crust"], 3->"Solar", 4->"Meteorite",5->"Ocean"|>;
+	blankScreen[];
+  cmd = Map[formatCommand[#[[1]],
+      getColor[#[[2]]]] &, 
+        RandomSample@sl[slide]];
+  setElement/@ cmd;
+  
+ *)
 ]
 
 End[];

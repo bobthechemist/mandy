@@ -136,7 +136,7 @@ def phase():
 def discoveryyear():
   sendexpression("display[11]")
   getresult()
-  return "Displaying\ndiscovery year.\n\nRed=old Purple=new"
+  return "Displaying\ndiscovery year.\n\nPurple=old Red=new"
 
 def block():
   sendexpression("display[12]")
@@ -187,6 +187,16 @@ def restart():
   sendexpression("blankScreen[]")
   os.system("sudo shutdown -r now")
   return "Restarting..."
+
+def hello():
+  sendexpression("blankScreen[]")
+  getresult()
+  sendexpression("sendCommand[167,0,2,10]")
+  getresult()
+  sendexpression("blankscreen[]")
+  getresult()
+  return ""
+
 
 def story():
   s = tts.lcdspeak

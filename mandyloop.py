@@ -82,6 +82,7 @@ latent = time.time()
 #time.sleep(2)
 #os._exit(1)
 
+hello()
 
 # Main loop 
 while True:
